@@ -1,0 +1,25 @@
+postgresBackup:
+  name: postgres-backup
+  deployment:
+    image:
+      repository: registry.gitlab.com/tools/common-images/backup-psql-to-sftp
+      tag: latest
+    imagePullPolicy: Always
+  enabled: true
+  cron: "0 2 * * *"
+  env:
+    pg:
+      host: "testpostgresql"
+      user: "testpostgresql"
+      password: "testpostgresql"
+    sftp:
+      password: "test123"
+      user: "test"
+      host: "testpostgres"
+      storagePath: "/home/kubernetes/test/storage/pg_backup"
+    ssmtpEmail:
+      subject: "Postgres_backup"
+      msgStart: "The backup for Postgres has been started"
+      msgSuccess: "The backup for Postgres was successful"
+      msgFail: "The backup for Postgres was failed"
+      recipients: "example@email.pl,example2@email.pl,example3@email.pl"
