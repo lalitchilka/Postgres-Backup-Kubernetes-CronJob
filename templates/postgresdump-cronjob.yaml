@@ -1,0 +1,44 @@
+{{- if .Values.postgresBackup.enabled }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ template "postgresBackup.name" . }}
+spec:
+  schedule: "{{ .Values.postgresBackup.cron }}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: {{ template "postgresBackup.name" . }}
+              imagePullPolicy: {{ .Values.postgresBackup.deployment.imagePullPolicy }}
+              image: "{{ .Values.postgresBackup.deployment.image.repository }}:{{ .Values.postgresBackup.deployment.image.tag }}"
+              env:
+                - name: PGHOST
+                  value: {{ .Values.postgresBackup.env.pg.host }}
+                - name: PGUSER
+                  value: {{ .Values.postgresBackup.env.pg.user }}
+                - name: PGPASSWORD
+                  value: {{ .Values.postgresBackup.env.pg.password }}
+                - name: SFTPPASSWORD
+                  value: {{ .Values.postgresBackup.env.sftp.password }}
+                - name: SFTPUSER
+                  value: {{ .Values.postgresBackup.env.sftp.user }}
+                - name: SFTPHOST
+                  value: {{ .Values.postgresBackup.env.sftp.host }}
+                - name: SFTPSTORAGEPATH
+                  value: {{ .Values.postgresBackup.env.sftp.storagePath }}
+                - name: EMAILSUBJECT
+                  value: {{ .Values.postgresBackup.env.ssmtpEmail.subject }}
+                - name: EMAILMSGSTART
+                  value: {{ .Values.postgresBackup.env.ssmtpEmail.msgStart }}
+                - name: EMAILMSGSUCCESS
+                  value: {{ .Values.postgresBackup.env.ssmtpEmail.msgSuccess }}
+                - name: EMAILMSGFAIL
+                  value: {{ .Values.postgresBackup.env.ssmtpEmail.msgFail }}
+                - name: EMAILRECIPIENTS
+                  value: {{ .Values.postgresBackup.env.ssmtpEmail.recipients }}
+          imagePullSecrets:
+            - name: {{ .Values.registry.imagePullSecrets }}
+          restartPolicy: OnFailure
+{{- end }}
